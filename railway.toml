@@ -1,7 +1,11 @@
 [build]
-command = "cargo build --release"
+builder = "nixpacks"
+buildCommand = "cargo build --release"
 
 [deploy]
 startCommand = "./target/release/covclaim"
 healthcheckPath = "/"
 healthcheckTimeout = 10000
+
+[nixpacks]
+rust-version = "1.79"
