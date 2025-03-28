@@ -1,22 +1,21 @@
-FROM rust:1.79 AS builder
+# Use a single-stage build to reduce complexity
+FROM rust:slim
 
 WORKDIR /app
 
-COPY ./ ./
+COPY . .
 
+# Install only required dependencies without upgrade
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libsqlite3-0 libpq5 ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Build the application
 RUN cargo build --release
 
-FROM debian:bookworm-slim
-
-RUN apt-get update && \
-  apt-get upgrade && \
-  apt-get install -y libsqlite3-0 libpq5 ca-certificates && \
-  apt-get clean all && \
-  rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /app/target/release/covclaim /usr/local/bin/covclaim
-COPY --from=builder /app/.env /.env
-
+# Configure the application
 EXPOSE 1234
 
-CMD ["/usr/local/bin/covclaim"]
+# Run the application
+CMD ["./target/release/covclaim"]
