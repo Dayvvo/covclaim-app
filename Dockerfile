@@ -36,5 +36,8 @@ RUN RUST_BACKTRACE=1 cargo build --release -v
 # Configure the application
 EXPOSE 1234
 
+# Set API_HOST to listen on all available interfaces
+ENV API_HOST=0.0.0.0
+
 # Run the application
 CMD ["./target/release/covclaim"]
