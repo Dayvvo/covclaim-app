@@ -1,18 +1,37 @@
-# Use a single-stage build to reduce complexity
+# Start with a Rust image that already has the toolchain
 FROM rust:slim
 
 WORKDIR /app
 
+# Install build dependencies first
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    pkg-config \
+    libssl-dev \
+    libsqlite3-dev \
+    libpq-dev \
+    ca-certificates \
+    build-essential \
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy only the files needed for dependency resolution first
+COPY Cargo.toml Cargo.lock ./
+# If you have a build.rs file, copy it too
+COPY build.rs ./
+
+# Create a dummy src/main.rs to trigger dependency compilation
+RUN mkdir -p src && \
+    echo "fn main() {}" > src/main.rs && \
+    cargo build --release && \
+    rm -rf src target/release/deps/covclaim*
+
+# Now copy the real source code
 COPY . .
 
-# Install only required dependencies without upgrade
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends libsqlite3-0 libpq5 ca-certificates && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Build the application
-RUN cargo build --release
+# Build the application with verbose output
+RUN RUST_BACKTRACE=1 cargo build --release -v
 
 # Configure the application
 EXPOSE 1234

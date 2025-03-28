@@ -1,0 +1,7 @@
+.git/
+target/
+.dockerignore
+db.sqlite
+Dockerfile
+Dockerfile.new
+README.md
