@@ -1,8 +1,7 @@
-   [build]
-   command = """
-   apt-get update -qq && \
-   apt-get upgrade -y && \
-   apt-get install -y libsqlite3-0 libpq5 ca-certificates && \
-   apt-get clean && \
-   rm -rf /var/lib/apt/lists/*
-   """
+[build]
+command = "cargo build --release"
+
+[deploy]
+startCommand = "./target/release/covclaim"
+healthcheckPath = "/"
+healthcheckTimeout = 10000
